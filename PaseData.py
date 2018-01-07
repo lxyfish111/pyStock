@@ -8,7 +8,7 @@ import smtplib
 from email.mime.text import MIMEText  
 from email.header import Header  
 
-def checkM2andM5(m2, m5, code):
+def checkmean(m2, m5, code):
     for i in range(m2.size):
         if m2[i] != 0 and m5[i] != 0:
 
@@ -24,6 +24,73 @@ def checkM2andM5(m2, m5, code):
                 
     return 0
 
+#Calc EMA
+def calcEMA(closeValueList, n):
+    ema = []
+
+    for i in range(0, len(closeValueList)):
+        if i == 0:
+            ema.append(closeValueList[i])
+        elif i > 0:
+            ema.append((2 * closeValueList[i] + (n - 1) * ema[i - 1]) / (n + 1))
+        
+    return ema
+
+#Calc DIFF
+def calcDIFF(closeValueList, shortD = 12, longD = 26):
+    shortEMA = calcEMA(closeValueList, shortD)
+    longEMA = calcEMA(closeValueList, longD)
+    diff = pd.Series(shortEMA) - pd.Series(longEMA)
+    return diff
+
+#calc DEA
+def calcDEA(diff, m = 9):
+    dea = []
+
+    for i in range(0, len(diff)):
+        if i == 0:
+            dea.append(diff[i])
+        elif i > 0:
+            dea.append((2 * diff[i] + (m - 1) * dea[i - 1]) / (m + 1))
+
+    return dea
+
+#Calc MACD
+def calcMACD(diff, dea):
+    macd = 2 * (diff - dea)
+    return macd   
+
+#Get buy point
+def getBuyPt(diff, dea, macd, m5, m10, m20):
+    ret = False
+    indexMax = len(diff) -1
+    for i in range(0, len(diff)):
+        if diff[i] > 0 and dea[i] > 0 and diff[i] == dea[i]:
+            k = diff[indexMax] - diff[i]
+            if k >= 0:
+                ret = ret or True
+            else:
+                ret = ret and False
+
+        if m5[i] < m10[i] and m10[i] < m20[i]:
+            ret = ret and False
+        elif m5[i] > m10[i] and m10[i] > m20[i]:
+            ret = ret or True
+    
+    return ret
+'''
+        if i == 0:
+            continue
+
+        if macd[i - 1] < 0 and macd [i] >= 0:
+            ret = ret or True
+        elif macd[i - 1] > 0 and macd[i] <= 0:
+            ret = ret and False
+'''
+
+    
+
+
 def main():
     print("pd version:%s" %pd.__version__)
 
@@ -33,7 +100,7 @@ def main():
 
     htmlp = ""
 
-    for i in range(0,len(list)):
+    for i in range(0, len(list)):
         path = os.path.join(rootdir,list[i])
         if os.path.isfile(path):
             print("股票:%s" %list[i])
@@ -44,20 +111,28 @@ def main():
             #把数据从远到近排列
             stock_data.sort_values('日期', inplace=True)
             stock_data.head()
-            m2 = pd.rolling_mean(stock_data['收盘价'], 2)
-            m5 = pd.rolling_mean(stock_data['收盘价'], 5)
-            m10 = pd.rolling_mean(stock_data['收盘价'], 10)
-            m20 = pd.rolling_mean(stock_data['收盘价'], 20)
-            m30 = pd.rolling_mean(stock_data['收盘价'], 30)
-            ret = checkM2andM5(m5, m10, list[i])
 
-            if ret == 1:
+            #m2 = stock_data['收盘价'].rolling(window = 2, center = False).mean()
+            m5 = stock_data['收盘价'].rolling(window = 5, center = False).mean()
+            m10 = stock_data['收盘价'].rolling(window = 10, center = False).mean()
+            m20 = stock_data['收盘价'].rolling(window = 20, center = False).mean()
+            m30 = stock_data['收盘价'].rolling(window = 30, center = False).mean()
+
+            diff = calcDIFF(stock_data['收盘价'])
+            dea = calcDEA(diff)
+            macd = calcMACD(diff, dea)
+
+            ret = getBuyPt(diff, dea, macd, m5, m10, m20)
+            
+            if ret == True:
                 mcodes.append(stock_data['名称'][1])
-                htmlp += "<p>" + stock_data['名称'][1] + "</p>" 
- 
+                #htmlp += "<p>" + stock_data['名称'][1] + "</p>" 
+            
+
+            
     save = pd.DataFrame({'股票:': mcodes})
     save.to_csv('./result.csv', index=False) 
-
+'''
     #发送邮件
     sender = 'lxy_fish_111@163.com'  
     receiver = 'lxy_fish_111@163.com'  
@@ -90,6 +165,6 @@ def main():
     smtp.login(username, password)  
     smtp.sendmail(sender, receiver, msg.as_string())  
     smtp.quit()        
-
+'''
 if __name__ == '__main__':
 	main()
