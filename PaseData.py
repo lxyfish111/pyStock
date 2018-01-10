@@ -88,6 +88,17 @@ def getBuyPt(diff, dea, macd, m5, m10, m20):
             ret = ret and False
 '''
 
+#m5 m10
+def checkRule(mS, mL):
+   maxlen = len(mS)
+   for i in range(0, maxlen):
+      if i == 0:
+         continue
+
+      if mS[i] == mL[i] and (mS[i] - mS[i - 1]) > 0:# and (mL[maxlen - 1] - mL[i]) > 0:
+         return True
+
+   return False
     
 
 
@@ -122,7 +133,8 @@ def main():
             dea = calcDEA(diff)
             macd = calcMACD(diff, dea)
 
-            ret = getBuyPt(diff, dea, macd, m5, m10, m20)
+            #ret = getBuyPt(diff, dea, macd, m5, m10, m20)
+            ret = checkRule(m5, m10)
             
             if ret == True:
                 mcodes.append(stock_data['名称'][1])
