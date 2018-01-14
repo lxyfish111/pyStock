@@ -62,31 +62,21 @@ def calcMACD(diff, dea):
 
 #Get buy point
 def getBuyPt(diff, dea, macd, m5, m10, m20):
-    ret = True
+ 
     indexMax = len(diff) -1
     for i in range(0, len(diff)):
-        if diff[i] > 0 and dea[i] > 0 and diff[i] == dea[i]:
-            k = diff[indexMax] - diff[i]
-            if k >= 0:
-                ret = ret and True
-            else:
-                ret = ret and False
-
-        if m5[i] < m10[i] and m10[i] < m20[i]:
-            ret = ret and False
-        elif m5[i] > m10[i] and m10[i] > m20[i]:
-            ret = ret and True
-    
-    return ret
-'''
         if i == 0:
             continue
+        if (diff[i] > 0) and (dea[i] > 0) and (diff[i] == dea[i]):
+            k = diff[indexMax] - diff[i]
+            if k < 0:
+                return False
+        
+        if macd[i - 1] > 0 and macd[i] <= 0:
+            return False
 
-        if macd[i - 1] < 0 and macd [i] >= 0:
-            ret = ret or True
-        elif macd[i - 1] > 0 and macd[i] <= 0:
-            ret = ret and False
-'''
+    return True
+
 
 #m5 m10
 def checkRule(mS, mL):
