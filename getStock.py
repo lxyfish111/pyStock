@@ -56,6 +56,7 @@ def makedir(path):
 
 def main():
     makedir("./ll_stock_data/") 
+    makedir("./stock_exponent/")
 
     start = datetime.datetime.now() - datetime.timedelta(days=30)
     end = datetime.datetime.now()
@@ -64,22 +65,31 @@ def main():
     
     allCodelist = urlTolist(stock_CodeUrl)
 
+    urlFont = 'http://quotes.money.163.com/service/chddata.html?code='
+    urlEnd = '&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP'
+
+    #获取上证指数0000001 深证成指1399001
+    url = urlFont + "0000001" + '&start=' + strStart + '&end=' + strEnd + urlEnd
+    urllib.request.urlretrieve(url,'./stock_exponent/' + '000001.csv')
+
+    url = urlFont + "1399001" + '&start=' + strStart + '&end=' + strEnd + urlEnd
+    urllib.request.urlretrieve(url,'./stock_exponent/' + '399001.csv')
+
     #获取工作目录
 	#os.getcwd()
     mcodes = []
-#    names = []
-#    count = 0
+
     for code in allCodelist:
 
         print('正在获取%s股票数据...'%code)
         
-        if code[0]=='6':
+        if code[0]=='6': #沪证
+            url = urlFont + '0' + code + \
+                '&start=' + strStart + '&end=' + strEnd + urlEnd
+        else: #深证
+            url = urlFont + '1' + code + \
+                '&start=' + strStart + '&end=' + strEnd + urlEnd
 
-            url = 'http://quotes.money.163.com/service/chddata.html?code=0' + code + \
-                '&start=' + strStart + '&end=' + strEnd + '&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP'
-        else:
-            url = 'http://quotes.money.163.com/service/chddata.html?code=1' + code + \
-                '&start=' + strStart + '&end=' + strEnd + '&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP'
         urllib.request.urlretrieve(url,'./ll_stock_data/' + code + '.csv')
 
 if __name__ == '__main__':

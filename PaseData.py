@@ -62,20 +62,20 @@ def calcMACD(diff, dea):
 
 #Get buy point
 def getBuyPt(diff, dea, macd, m5, m10, m20):
-    ret = False
+    ret = True
     indexMax = len(diff) -1
     for i in range(0, len(diff)):
         if diff[i] > 0 and dea[i] > 0 and diff[i] == dea[i]:
             k = diff[indexMax] - diff[i]
             if k >= 0:
-                ret = ret or True
+                ret = ret and True
             else:
                 ret = ret and False
 
         if m5[i] < m10[i] and m10[i] < m20[i]:
             ret = ret and False
         elif m5[i] > m10[i] and m10[i] > m20[i]:
-            ret = ret or True
+            ret = ret and True
     
     return ret
 '''
@@ -95,7 +95,7 @@ def checkRule(mS, mL):
       if i == 0:
          continue
 
-      if mS[i] == mL[i] and (mS[i] - mS[i - 1]) > 0:# and (mL[maxlen - 1] - mL[i]) > 0:
+      if mS[i] == mL[i] and (mS[i] - mS[i - 1]) > 0 and (mS[maxlen - 1] - mS[i]) > 0:
          return True
 
    return False
@@ -133,8 +133,8 @@ def main():
             dea = calcDEA(diff)
             macd = calcMACD(diff, dea)
 
-            #ret = getBuyPt(diff, dea, macd, m5, m10, m20)
-            ret = checkRule(m5, m10)
+            ret = getBuyPt(diff, dea, macd, m5, m10, m20)
+            #ret = checkRule(m5, m10)
             
             if ret == True:
                 mcodes.append(stock_data['名称'][1])
