@@ -89,7 +89,24 @@ def checkRule(mS, mL):
          return True
 
    return False
-    
+ 
+#Trend line
+def getTrendLine(openPrice, closePrice):
+   trend = []
+   size = len(openPrice)
+   
+   mean_openPrice = sum(openPrice) / size
+   maxClosePrice = max(closePrice)
+   minClosePrice = min(closePrice)
+
+   rangeVal = maxClosePrice - minClosePrice
+   upper = mean_openPrice + rangeVal
+   lower = mean_openPrice + rangeVal
+
+   trend.append(upper)
+   trend.append(lower)
+
+   return
 
 
 def main():
