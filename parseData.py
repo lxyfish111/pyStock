@@ -80,34 +80,51 @@ def getBuyPt(diff, dea, macd, m5, m10, m20):
 
 #m5 m10
 def checkRule(mS, mL):
-   maxlen = len(mS)
-   for i in range(0, maxlen):
-      if i == 0:
-         continue
+    maxlen = len(mS)
+    for i in range(0, maxlen):
+       if i == 0:
+          continue
 
-      if mS[i] == mL[i] and (mS[i] - mS[i - 1]) > 0 and (mS[maxlen - 1] - mS[i]) > 0:
-         return True
+       if mS[i] == mL[i] and (mS[i] - mS[i - 1]) > 0 and (mS[maxlen - 1] - mS[i]) > 0:
+          return True
 
-   return False
+    return False
  
 #Trend line
 def getTrendLine(openPrice, closePrice):
-   trend = []
-   size = len(openPrice)
+    trend = []
+    size = len(openPrice)
+
+    if size == 0:
+        trend.append(0)
+        trend.append(0)
+        return
    
-   mean_openPrice = sum(openPrice) / size
-   maxClosePrice = max(closePrice)
-   minClosePrice = min(closePrice)
+    mean_openPrice = sum(openPrice) / size
+    maxClosePrice = max(closePrice)
+    minClosePrice = min(closePrice)
 
-   rangeVal = maxClosePrice - minClosePrice
-   upper = mean_openPrice + rangeVal
-   lower = mean_openPrice + rangeVal
+    rangeVal = maxClosePrice - minClosePrice
+    upper = mean_openPrice + rangeVal
+    lower = mean_openPrice + rangeVal
 
-   trend.append(upper)
-   trend.append(lower)
+    trend.append(upper)
+    trend.append(lower)
 
-   return
+    return trend
 
+#Check the trend line
+def checkTrendline(openPriceList, closePriceList):
+    trend = getTrendLine(openPriceList, closePriceList)
+    if trend[0] == 0 and trend[1] == 0:
+        return False
+
+    size = len(openPriceList)
+
+    if (closePriceList[size - 1] > trend[0] and trend[0] > closePriceList[size - 2]) or (closePriceList[size - 1] > trend[1] and trend[1] > closePriceList[size - 2]):
+        return True
+
+    return False
 
 def main():
     print("pd version:%s" %pd.__version__)
@@ -140,8 +157,9 @@ def main():
             dea = calcDEA(diff)
             macd = calcMACD(diff, dea)
 
-            ret = getBuyPt(diff, dea, macd, m5, m10, m20)
+            #ret = getBuyPt(diff, dea, macd, m5, m10, m20)
             #ret = checkRule(m5, m10)
+            ret = checkTrendline(stock_data['开盘价'], stock_data['收盘价'])
             
             if ret == True:
                 mcodes.append(stock_data['名称'][1])
