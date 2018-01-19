@@ -89,7 +89,30 @@ def checkRule(mS, mL):
           return True
 
     return False
- 
+
+#Get the Cross Stars
+def getCrossStars(openPriceList, maxPriceList, minPriceList, closePriceList, exponential):
+    for i in range(0, len(closePriceList)):
+        if i == 0:
+            continue
+
+        rs = closePriceList[i] / closePriceList[i - 1] - 1
+        ri = exponential[i] / exponential[i - 1] - 1
+        re = rs - ri
+        oprice = re * openPriceList[i]
+        maxprice = re * maxPriceList[i]
+        minprice = re * minPriceList[i]
+        cprice = re * closePriceList[i]
+
+        h = abs(cprice - oprice)
+        upshadowlen = maxprice - max(oprice, cprice)
+        downshadowlen = min(oprice, cprice) - minprice
+        
+        if h < 0.001 * oprice and upshadowlen > (3 * h) and downshadowlen > (3 * h):
+            return True
+            
+    return False
+
 #Trend line
 def getTrendLine(openPrice, closePrice):
     trend = []
@@ -98,7 +121,7 @@ def getTrendLine(openPrice, closePrice):
     if size == 0:
         trend.append(0)
         trend.append(0)
-        return
+        return trend
    
     mean_openPrice = sum(openPrice) / size
     maxClosePrice = max(closePrice)
@@ -120,8 +143,10 @@ def checkTrendline(openPriceList, closePriceList):
         return False
 
     size = len(openPriceList)
+    print (trend[0])
+    print (trend[1])
 
-    if (closePriceList[size - 1] > trend[0] and trend[0] > closePriceList[size - 2]) or (closePriceList[size - 1] > trend[1] and trend[1] > closePriceList[size - 2]):
+    if closePriceList[size - 1] > trend[0] > closePriceList[size - 2] or closePriceList[size - 1] > trend[1]  > closePriceList[size - 2]:
         return True
 
     return False
@@ -134,6 +159,9 @@ def main():
     mcodes = []
 
     htmlp = ""
+
+    #expopath = './stock_exponent/000001.csv'
+    #expo = pd.read_csv(expopath, parse_dates=[1],encoding='gbk')
 
     for i in range(0, len(list)):
         path = os.path.join(rootdir,list[i])
@@ -150,16 +178,17 @@ def main():
             #m2 = stock_data['收盘价'].rolling(window = 2, center = False).mean()
             m5 = stock_data['收盘价'].rolling(window = 5, center = False).mean()
             m10 = stock_data['收盘价'].rolling(window = 10, center = False).mean()
-            m20 = stock_data['收盘价'].rolling(window = 20, center = False).mean()
-            m30 = stock_data['收盘价'].rolling(window = 30, center = False).mean()
+            #m20 = stock_data['收盘价'].rolling(window = 20, center = False).mean()
+            #m30 = stock_data['收盘价'].rolling(window = 30, center = False).mean()
 
-            diff = calcDIFF(stock_data['收盘价'])
-            dea = calcDEA(diff)
-            macd = calcMACD(diff, dea)
+            #diff = calcDIFF(stock_data['收盘价'])
+            #dea = calcDEA(diff)
+            #macd = calcMACD(diff, dea)
 
             #ret = getBuyPt(diff, dea, macd, m5, m10, m20)
-            #ret = checkRule(m5, m10)
-            ret = checkTrendline(stock_data['开盘价'], stock_data['收盘价'])
+            ret = checkRule(m5, m10)
+            #ret = checkTrendline(stock_data['开盘价'], stock_data['收盘价'])
+            #ret = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], expo)
             
             if ret == True:
                 mcodes.append(stock_data['名称'][1])
