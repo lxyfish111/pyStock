@@ -20,9 +20,9 @@ def checkmean(m2, m5, code):
                     slopM2 = m2[i + 1] - m2[i]
                 
                 if slopM2 > 0:
-                    return 1
+                    return True
                 
-    return 0
+    return False
 
 #Calc EMA
 def calcEMA(closeValueList, n):
@@ -160,24 +160,39 @@ def main():
 
     htmlp = ""
 
-    #expopath = './stock_exponent/000001.csv'
-    #expo = pd.read_csv(expopath, parse_dates=[1],encoding='gbk')
+    shExpoPath = './stock_exponent/000001.csv'
+    shexpo = pd.read_csv(shExpoPath, parse_dates = True, encoding = 'gbk')
+
+    szExpoPath = './stock_exponent/399001.csv'
+    szexpo = pd.read_csv(szExpoPath, parse_dates = True, encoding = 'gbk')
 
     for i in range(0, len(list)):
         path = os.path.join(rootdir,list[i])
         if os.path.isfile(path):
-            print("股票:%s" %list[i])
-            stock_data = pd.read_csv(path, parse_dates=[1],encoding='gbk')
             
+            #if list[i] != '600181.csv':
+            #    continue
+            #print("股票:%s" %list[i])
+
+            stock_data = pd.read_csv(path, parse_dates = True,encoding = 'gbk')
+            if stock_data.empty:  #可能停牌的股票
+                print("股票:%s is empty" %list[i])
+                continue
+
+            if 'ST' in stock_data['名称'][0]:
+                print('股票:%s is ST股票' %stock_data['名称'][0])
+                continue
+
+
             stock_data.head()
 
             #把数据从远到近排列
             stock_data.sort_values('日期', inplace=True)
             stock_data.head()
 
-            #m2 = stock_data['收盘价'].rolling(window = 2, center = False).mean()
+            m2 = stock_data['收盘价'].rolling(window = 2, center = False).mean()
             m5 = stock_data['收盘价'].rolling(window = 5, center = False).mean()
-            m10 = stock_data['收盘价'].rolling(window = 10, center = False).mean()
+            #m10 = stock_data['收盘价'].rolling(window = 10, center = False).mean()
             #m20 = stock_data['收盘价'].rolling(window = 20, center = False).mean()
             #m30 = stock_data['收盘价'].rolling(window = 30, center = False).mean()
 
@@ -186,18 +201,28 @@ def main():
             #macd = calcMACD(diff, dea)
 
             #ret = getBuyPt(diff, dea, macd, m5, m10, m20)
-            ret = checkRule(m5, m10)
+            ret = checkRule(m2, m5)
             #ret = checkTrendline(stock_data['开盘价'], stock_data['收盘价'])
-            #ret = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], expo)
-            
+            strCode = ''
+            strCode = stock_data['股票代码'][0]
+            #print(stock_data)
+
+            if strCode[1] == '6':
+                ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], shexpo['收盘价'])
+            else:
+                ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], szexpo['收盘价'])
+
+            ret = ret and ret1            
+
             if ret == True:
-                mcodes.append(stock_data['名称'][1])
+                mcodes.append(stock_data['名称'][0])
                 #htmlp += "<p>" + stock_data['名称'][1] + "</p>" 
             
 
             
     save = pd.DataFrame({'股票:': mcodes})
     save.to_csv('./result.csv', index=False) 
+
 '''
     #发送邮件
     sender = 'lxy_fish_111@163.com'  
