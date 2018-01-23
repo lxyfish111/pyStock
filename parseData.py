@@ -3,6 +3,11 @@ import pandas as pd
 import os
 import time
 
+#unicode error
+import io
+import sys
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf-8')
+
 #发送邮件
 import smtplib  
 from email.mime.text import MIMEText  
