@@ -156,14 +156,34 @@ def checkTrendline(openPriceList, closePriceList):
 
     return False
 
+def checkVolume(RaF, Volume):
+    up = 0.0
+    down = 0.0
+    for i in range(0, len(RaF)):
+        if RaF[i] == 'None':
+            continue
+
+        if float(RaF[i]) > 0:
+            up = up + Volume[i]
+        else:
+            down = down + Volume[i]
+
+    tmp = 8 * (up + down) / 10
+
+    if up > tmp:
+        return True
+
+    return False
+
 def main():
     print("pd version:%s" %pd.__version__)
 
     rootdir = './ll_stock_data/'
     list = os.listdir(rootdir) #列出文件夹下所有的目录与文件
     mcodes = []
+    mnames = []
 
-    htmlp = ""
+    #htmlp = ""
 
     shExpoPath = './stock_exponent/000001.csv'
     shexpo = pd.read_csv(shExpoPath, parse_dates = True, encoding = 'gbk')
@@ -195,8 +215,8 @@ def main():
             stock_data.sort_values('日期', inplace=True)
             stock_data.head()
 
-            m2 = stock_data['收盘价'].rolling(window = 2, center = False).mean()
-            m5 = stock_data['收盘价'].rolling(window = 5, center = False).mean()
+            #m2 = stock_data['收盘价'].rolling(window = 2, center = False).mean()
+            #m5 = stock_data['收盘价'].rolling(window = 5, center = False).mean()
             #m10 = stock_data['收盘价'].rolling(window = 10, center = False).mean()
             #m20 = stock_data['收盘价'].rolling(window = 20, center = False).mean()
             #m30 = stock_data['收盘价'].rolling(window = 30, center = False).mean()
@@ -206,26 +226,28 @@ def main():
             #macd = calcMACD(diff, dea)
 
             #ret = getBuyPt(diff, dea, macd, m5, m10, m20)
-            ret = checkRule(m2, m5)
+            #ret = checkRule(m5, m10)
             #ret = checkTrendline(stock_data['开盘价'], stock_data['收盘价'])
-            strCode = ''
+
+            ret2 = checkVolume(stock_data['涨跌幅'], stock_data['成交量'])
+
             strCode = stock_data['股票代码'][0]
-            #print(stock_data)
 
             if strCode[1] == '6':
                 ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], shexpo['收盘价'])
             else:
                 ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], szexpo['收盘价'])
 
-            ret = ret and ret1            
+            ret = ret1 and ret2           
 
             if ret == True:
-                mcodes.append(stock_data['名称'][0])
+                mnames.append(stock_data['名称'][0])
+                mcodes.append(stock_data['股票代码'][0])
                 #htmlp += "<p>" + stock_data['名称'][1] + "</p>" 
             
 
             
-    save = pd.DataFrame({'股票:': mcodes})
+    save = pd.DataFrame({'股票:': mnames, '股票代码:': mcodes})
     save.to_csv('./result.csv', index=False) 
 
 '''
