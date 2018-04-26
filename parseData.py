@@ -69,7 +69,7 @@ def calcMACD(diff, dea):
 def getBuyPt(diff, dea, macd, m5, m10, m20):
  
     indexMax = len(diff) -1
-    for i in range(0, len(diff)):
+    for i in range(1, len(diff)):
         if i == 0:
             continue
         if (diff[i] > 0) and (dea[i] > 0) and (diff[i] == dea[i]):
@@ -183,7 +183,7 @@ def checkMACD(diff, macd):
     if i == len(macd):
         return False
 
-    if diff[i] < 0:
+    if diff[i] < 0 or macd[i] < 0:
         return False
 
     if diff[i - 1] < macd[i - 1]:
@@ -235,30 +235,30 @@ def main():
             stock_data.head()
 
             #m2 = stock_data['收盘价'].rolling(window = 2, center = False).mean()
-            #m5 = stock_data['收盘价'].rolling(window = 5, center = False).mean()
-            #m10 = stock_data['收盘价'].rolling(window = 10, center = False).mean()
-            #m20 = stock_data['收盘价'].rolling(window = 20, center = False).mean()
+            m5 = stock_data['收盘价'].rolling(window = 5, center = False).mean()
+            m10 = stock_data['收盘价'].rolling(window = 10, center = False).mean()
+            m20 = stock_data['收盘价'].rolling(window = 20, center = False).mean()
             #m30 = stock_data['收盘价'].rolling(window = 30, center = False).mean()
 
             diff = calcDIFF(stock_data['收盘价'])
             dea = calcDEA(diff)
             macd = calcMACD(diff, dea)
 
-            #ret = getBuyPt(diff, dea, macd, m5, m10, m20)
+            ret3 = getBuyPt(diff, dea, macd, m5, m10, m20)
             #ret = checkRule(m5, m10)
             #ret = checkTrendline(stock_data['开盘价'], stock_data['收盘价'])
 
             #ret2 = checkVolume(stock_data['涨跌幅'], stock_data['成交量'])
-            ret = checkMACD(diff, macd)
+            ret2 = checkMACD(diff, macd)
 
-            #strCode = stock_data['股票代码'][0]
+            strCode = stock_data['股票代码'][0]
 
-            #if strCode[1] == '6':
-            #    ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], shexpo['收盘价'])
-            #else:
-            #    ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], szexpo['收盘价'])
+            if strCode[1] == '6':
+                ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], shexpo['收盘价'])
+            else:
+                ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], szexpo['收盘价'])
 
-            #ret = ret1 and ret2           
+            ret = ret1 and ret2 and ret3
 
             if ret == True:
                 mnames.append(stock_data['名称'][0])
