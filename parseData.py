@@ -66,34 +66,22 @@ def calcMACD(diff, dea):
     return macd   
 
 #Get buy point
-def getBuyPt(diff, dea, macd, m5, m10, m20):
+def getBuyPt(diff, macd, m5, m10, m15):
  
-    indexMax = len(diff) -1
-    for i in range(0, len(diff)):
-        if i == 0:
-            continue
-        if (diff[i] > 0) and (dea[i] > 0) and (diff[i] == dea[i]):
-            k = diff[indexMax] - diff[i]
-            if k < 0:
-                return False
-        
-        if macd[i - 1] > 0 and macd[i] <= 0:
-            return False
+    ret = False
+    for i in range(1, len(diff)):
+        if diff[i] == macd[i] and diff[i - 1] < macd[i - 1]:
+            ret = ret or True
+            break
 
-    return True
+    nlen = len(m5)
+    for n in range(0, len(m5)):
+        if m5[n] == m10[n] == m15[n] and m5[n - 1] < m10[n- 1] < m15[n-1]:
+            if m5[nlen - 1] > m10[nlen - 1] > m15[nlen - 1]:
+                ret = ret or True
+                break
 
-
-#m5 m10
-def checkRule(mS, mL):
-    maxlen = len(mS)
-    for i in range(0, maxlen):
-       if i == 0:
-          continue
-
-       if mS[i] == mL[i] and (mS[i] - mS[i - 1]) > 0 and (mS[maxlen - 1] - mS[i]) > 0:
-          return True
-
-    return False
+    return ret
 
 #Get the Cross Stars
 def getCrossStars(openPriceList, maxPriceList, minPriceList, closePriceList, exponential):
@@ -175,25 +163,6 @@ def checkVolume(RaF, Volume):
 
     return False
 
-def checkMACD(diff, macd):
-    for i in range(1, len(macd)):
-        if diff[i] == macd[i]:
-            break
-
-    if i == len(macd):
-        return False
-
-    if diff[i] < 0:
-        return False
-
-    if diff[i - 1] < macd[i - 1]:
-        return True
-    else:
-        return False
-
-
-
-
 def main():
     print("pd version:%s" %pd.__version__)
 
@@ -234,22 +203,18 @@ def main():
             stock_data.sort_values('日期', inplace=True)
             stock_data.head()
 
-            #m2 = stock_data['收盘价'].rolling(window = 2, center = False).mean()
-            #m5 = stock_data['收盘价'].rolling(window = 5, center = False).mean()
-            #m10 = stock_data['收盘价'].rolling(window = 10, center = False).mean()
-            #m20 = stock_data['收盘价'].rolling(window = 20, center = False).mean()
-            #m30 = stock_data['收盘价'].rolling(window = 30, center = False).mean()
+            m5 = stock_data['收盘价'].rolling(window = 5, center = False).mean()
+            m10 = stock_data['收盘价'].rolling(window = 10, center = False).mean()
+            m15 = stock_data['收盘价'].rolling(window = 20, center = False).mean()
 
             diff = calcDIFF(stock_data['收盘价'])
             dea = calcDEA(diff)
             macd = calcMACD(diff, dea)
 
-            #ret = getBuyPt(diff, dea, macd, m5, m10, m20)
-            #ret = checkRule(m5, m10)
+            ret = getBuyPt(diff, macd, m5, m10, m15)
             #ret = checkTrendline(stock_data['开盘价'], stock_data['收盘价'])
 
             #ret2 = checkVolume(stock_data['涨跌幅'], stock_data['成交量'])
-            ret = checkMACD(diff, macd)
 
             #strCode = stock_data['股票代码'][0]
 
@@ -264,8 +229,6 @@ def main():
                 mnames.append(stock_data['名称'][0])
                 mcodes.append(stock_data['股票代码'][0])
                 #htmlp += "<p>" + stock_data['名称'][1] + "</p>" 
-            
-
             
     save = pd.DataFrame({'股票:': mnames, '股票代码:': mcodes})
     save.to_csv('./result.csv', index=False) 
