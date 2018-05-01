@@ -56,7 +56,7 @@ def main():
     makedir("./ll_stock_data/") 
     makedir("./stock_exponent/")
 
-    start = datetime.datetime.now() - datetime.timedelta(days=30)
+    start = datetime.datetime.now() - datetime.timedelta(days=90)
     end = datetime.datetime.now()
     strStart = start.strftime('%Y%m%d')
     strEnd = end.strftime('%Y%m%d')

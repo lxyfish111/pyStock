@@ -67,20 +67,19 @@ def calcMACD(diff, dea):
 
 #Get buy point
 def getBuyPt(diff, macd, m5, m10, m15):
- 
     ret = False
     for i in range(1, len(diff)):
         if diff[i] == macd[i] and diff[i - 1] < macd[i - 1]:
             ret = ret or True
             break
-
+    
     nlen = len(m5)
     for n in range(0, len(m5)):
         if m5[n] == m10[n] == m15[n] and m5[n - 1] < m10[n- 1] < m15[n-1]:
             if m5[nlen - 1] > m10[nlen - 1] > m15[nlen - 1]:
                 ret = ret or True
                 break
-
+    
     return ret
 
 #Get the Cross Stars
