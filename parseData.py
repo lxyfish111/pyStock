@@ -66,6 +66,7 @@ def calcMACD(diff, dea):
     return macd   
 
 #Get buy point
+<<<<<<< HEAD
 def getBuyPt(diff, macd, m5, m10, m15):
     ret = False
     for i in range(1, len(diff)):
@@ -81,6 +82,36 @@ def getBuyPt(diff, macd, m5, m10, m15):
                 break
     
     return ret
+=======
+def getBuyPt(diff, dea, macd, m5, m10, m20):
+ 
+    indexMax = len(diff) -1
+    for i in range(1, len(diff)):
+        if i == 0:
+            continue
+        if (diff[i] > 0) and (dea[i] > 0) and (diff[i] == dea[i]):
+            k = diff[indexMax] - diff[i]
+            if k < 0:
+                return False
+        
+        if macd[i - 1] > 0 and macd[i] <= 0:
+            return False
+
+    return True
+
+
+#m5 m10
+def checkRule(mS, mL):
+    maxlen = len(mS)
+    for i in range(0, maxlen):
+       if i == 0:
+          continue
+
+       if mS[i] == mL[i] and (mS[i] - mS[i - 1]) > 0 and (mS[maxlen - 1] - mS[i]) > 0:
+          return True
+
+    return False
+>>>>>>> 910eb93671053be3014d3c8872fb76bccadd7e47
 
 #Get the Cross Stars
 def getCrossStars(openPriceList, maxPriceList, minPriceList, closePriceList, exponential):
@@ -162,6 +193,28 @@ def checkVolume(RaF, Volume):
 
     return False
 
+<<<<<<< HEAD
+=======
+def checkMACD(diff, macd):
+    for i in range(1, len(macd)):
+        if diff[i] == macd[i]:
+            break
+
+    if i == len(macd):
+        return False
+
+    if diff[i] < 0 or macd[i] < 0:
+        return False
+
+    if diff[i - 1] < macd[i - 1]:
+        return True
+    else:
+        return False
+
+
+
+
+>>>>>>> 910eb93671053be3014d3c8872fb76bccadd7e47
 def main():
     print("pd version:%s" %pd.__version__)
 
@@ -202,27 +255,44 @@ def main():
             stock_data.sort_values('日期', inplace=True)
             stock_data.head()
 
+<<<<<<< HEAD
             m5 = stock_data['收盘价'].rolling(window = 5, center = False).mean()
             m10 = stock_data['收盘价'].rolling(window = 10, center = False).mean()
             m15 = stock_data['收盘价'].rolling(window = 20, center = False).mean()
+=======
+            #m2 = stock_data['收盘价'].rolling(window = 2, center = False).mean()
+            m5 = stock_data['收盘价'].rolling(window = 5, center = False).mean()
+            m10 = stock_data['收盘价'].rolling(window = 10, center = False).mean()
+            m20 = stock_data['收盘价'].rolling(window = 20, center = False).mean()
+            #m30 = stock_data['收盘价'].rolling(window = 30, center = False).mean()
+>>>>>>> 910eb93671053be3014d3c8872fb76bccadd7e47
 
             diff = calcDIFF(stock_data['收盘价'])
             dea = calcDEA(diff)
             macd = calcMACD(diff, dea)
 
+<<<<<<< HEAD
             ret = getBuyPt(diff, macd, m5, m10, m15)
             #ret = checkTrendline(stock_data['开盘价'], stock_data['收盘价'])
 
             #ret2 = checkVolume(stock_data['涨跌幅'], stock_data['成交量'])
+=======
+            ret3 = getBuyPt(diff, dea, macd, m5, m10, m20)
+            #ret = checkRule(m5, m10)
+            #ret = checkTrendline(stock_data['开盘价'], stock_data['收盘价'])
 
-            #strCode = stock_data['股票代码'][0]
+            #ret2 = checkVolume(stock_data['涨跌幅'], stock_data['成交量'])
+            ret2 = checkMACD(diff, macd)
+>>>>>>> 910eb93671053be3014d3c8872fb76bccadd7e47
 
-            #if strCode[1] == '6':
-            #    ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], shexpo['收盘价'])
-            #else:
-            #    ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], szexpo['收盘价'])
+            strCode = stock_data['股票代码'][0]
 
-            #ret = ret1 and ret2           
+            if strCode[1] == '6':
+                ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], shexpo['收盘价'])
+            else:
+                ret1 = getCrossStars(stock_data['开盘价'], stock_data['最高价'], stock_data['最低价'], stock_data['收盘价'], szexpo['收盘价'])
+
+            ret = ret1 and ret2 and ret3
 
             if ret == True:
                 mnames.append(stock_data['名称'][0])
