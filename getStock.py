@@ -75,7 +75,6 @@ def main():
 
     #获取工作目录
 	#os.getcwd()
-    mcodes = []
 
     for code in allCodelist:
 
