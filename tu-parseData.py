@@ -17,6 +17,7 @@ from email.header import Header
 def main():
     print("pd version:%s" %pd.__version__)
     print("tushare version:%s" %ts.__version__)
+    '''
     data = ts.get_today_all()
     data['Profit yield'] = None
 
@@ -30,6 +31,28 @@ def main():
         data.at[i, 'Profit yield'] = 1 / data.at[i, 'per']
 
     data.to_csv("./get_today_all.csv")
+    '''
+    databasic = ts.get_stock_basics()
+    #databasic.sort_values(by = 'pb').to_csv("./get_today_all.csv")
+
+    dta8_1 = ts.get_report_data(2018, 1)
+    dta7_4 = ts.get_report_data(2017, 4)
+    dta7_3 = ts.get_report_data(2017, 3)
+    dta7_2 = ts.get_report_data(2017, 2)
+    dta7_1 = ts.get_report_data(2017, 1)
+    dta6_4 = ts.get_report_data(2016, 4)
+    dta6_3 = ts.get_report_data(2016, 3)
+    dta6_2 = ts.get_report_data(2016, 2)
+    dta6_1 = ts.get_report_data(2016, 1)
+
+    dtaROE = (dta8_1['roe'] + dta7_4['roe'] + dta7_3['roe'] + dta7_2['roe'] + dta7_1['roe']
+               + dta6_4['roe'] + dta6_3['roe'] + dta6_2['roe'] + dta6_1['roe']) / 9
+
+    print(dtaROE)
+
+    
+
+
 
     
         
